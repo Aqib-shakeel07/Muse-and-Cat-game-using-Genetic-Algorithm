@@ -2,13 +2,13 @@
 
 # Cat and Mouse Split-Screen Game 🎮
 
-A split-screen **tower defense game** built using Python's Pygame library. The game allows players to place towers strategically to eliminate enemies while competing against an AI using a **genetic algorithm** for tower placement.
+A split-screen **Cat and Mouse game** built using Python's Pygame library. The game allows players to place mousetraps strategically to eliminate enemies while competing against an AI using a **genetic algorithm** for mousetrap placement.
 
 ## Features
 
 - 🎯 **Split-Screen Gameplay**: Compete against the AI in a split-screen environment.
-- 🧠 **Genetic Algorithm**: The AI uses a genetic algorithm to decide optimal tower placement.
-- 💥 **Tower Defense Mechanics**: Place towers manually to attack and defeat incoming enemies.
+- 🧠 **Genetic Algorithm**: The AI uses a genetic algorithm to decide optimal mousetrap placement.
+- 💥 **mousetrap Defense Mechanics**: Place mousetraps manually to attack and defeat incoming enemies.
 - 🔊 **Sound Effects and Music**: Background music and effects enhance gameplay.
 - 🏆 **Dynamic Win Conditions**: Compete to eliminate a set number of enemies before the AI does.
 
@@ -20,15 +20,15 @@ A split-screen **tower defense game** built using Python's Pygame library. The g
    - Run the Python script.
    - Press `ENTER` at the main menu to begin.
 
-2. **Placing Towers**:
-   - Use the **mouse** to click on the left side of the screen (Player's side) to place towers.
-   - Towers will automatically attack nearby enemies.
+2. **Placing mousetraps**:
+   - Use the **mouse** to click on the left side of the screen (Player's side) to place mousetraps.
+   - mousetraps will automatically attack nearby enemies.
 
 3. **Objective**:
    - Eliminate **5 enemies** before the AI to win the game.
 
 4. **AI Side**:
-   - The AI will automatically place towers and eliminate enemies using its pre-calculated strategy.
+   - The AI will automatically place mousetraps and eliminate enemies using its pre-calculated strategy.
 
 5. **Winning**:
    - If you defeat all enemies first, you win.
@@ -38,7 +38,7 @@ A split-screen **tower defense game** built using Python's Pygame library. The g
 
 ## Controls
 
-- **Mouse Click**: Place towers on the player's grid.
+- **Mouse Click**: Place mousetraps on the player's grid.
 - **ESC**: Quit the game at any time.
 - **ENTER**: Start or restart the game.
 
@@ -81,16 +81,16 @@ A split-screen **tower defense game** built using Python's Pygame library. The g
 
 ### Grid Layout:
 - The screen is divided into **two halves**:
-   - Left Half: Player's area for tower placement.
-   - Right Half: AI's area for automated tower placement.
+   - Left Half: Player's area for mousetrap placement.
+   - Right Half: AI's area for automated mousetrap placement.
 
-### Towers:
-- **Player**: Manually places towers using mouse clicks.
-- **AI**: Automatically places towers using a genetic algorithm.
+### mousetraps:
+- **Player**: Manually places mousetraps using mouse clicks.
+- **AI**: Automatically places mousetraps using a genetic algorithm.
 
 ### Enemies:
 - Move randomly but stay within grid boundaries.
-- Have health bars that decrease when towers attack.
+- Have health bars that decrease when mousetraps attack.
 
 ---
 
@@ -104,9 +104,9 @@ A split-screen **tower defense game** built using Python's Pygame library. The g
 ## Future Improvements (To-Do)
 
 - Add more **enemy types** with different behaviors.
-- Implement **upgradable towers**.
+- Implement **upgradable mousetraps**.
 - Introduce more **levels** and increasing difficulty.
-- Improve AI tower placement strategies for better competition.
+- Improve AI mousetrap placement strategies for better competition.
 
 ---
 
