@@ -1,5 +1,3 @@
-Here is a **README** file for your Cat and Mouse Split-Screen game:
-
 ---
 
 # Cat and Mouse Split-Screen Game 🎮
