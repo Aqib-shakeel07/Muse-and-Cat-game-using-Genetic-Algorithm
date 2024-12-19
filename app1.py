@@ -181,15 +181,59 @@ class GeneticAlgorithm:
         self.population = []
 
     def initialize_population(self):
-        """Creates the initial population of mousetrap placements."""
+        """Create initial random population of mousetraps."""
         for _ in range(self.population_size):
             mousetraps = [
                 (random.randint(SCREEN_WIDTH // 2 // GRID_SIZE, SCREEN_WIDTH // GRID_SIZE - 1) * GRID_SIZE,
-                random.randint(0, SCREEN_HEIGHT // GRID_SIZE - 1) * GRID_SIZE)
+                 random.randint(0, SCREEN_HEIGHT // GRID_SIZE - 1) * GRID_SIZE)
                 for _ in range(random.randint(5, 10))
             ]
             self.population.append(mousetraps)
 
+    def fitness(self, mousetraps, mice):
+        """Calculate fitness as the number of mice in range."""
+        fitness = 0
+        for trap_x, trap_y in mousetraps:
+            for mouse in mice:
+                distance = ((trap_x - mouse.x) ** 2 + (trap_y - mouse.y) ** 2) ** 0.5
+                if distance <= GRID_SIZE * 3:  # Effective range
+                    fitness += 1
+        return fitness
+
+    def select_parents(self, mice):
+        """Select parents based on fitness."""
+        fitness_scores = [self.fitness(mousetraps, mice) for mousetraps in self.population]
+        sorted_population = [x for _, x in sorted(zip(fitness_scores, self.population), reverse=True)]
+        return sorted_population[:2]
+
+    def crossover(self, parent1, parent2):
+        """Perform crossover to create offspring."""
+        split = len(parent1) // 2
+        child = parent1[:split] + parent2[split:]
+        return child
+
+    def mutate(self, mousetraps):
+        """Mutate some traps with random positions."""
+        if random.random() < self.mutation_rate:
+            index = random.randint(0, len(mousetraps) - 1)
+            mousetraps[index] = (
+                random.randint(SCREEN_WIDTH // 2 // GRID_SIZE, SCREEN_WIDTH // GRID_SIZE - 1) * GRID_SIZE,
+                random.randint(0, SCREEN_HEIGHT // GRID_SIZE - 1) * GRID_SIZE
+            )
+
+    def create_new_generation(self, mice):
+        """Generate a new population."""
+        # Select the two best parents based on fitness
+        parent1, parent2 = self.select_parents(mice)
+        
+        # Clear the current population
+        self.population = []
+        
+        # Generate a new population
+        for _ in range(self.population_size):
+            child = self.crossover(parent1, parent2)
+            self.mutate(child)
+            self.population.append(child)
 
 def win(winner, n):
     pygame.mixer.music.stop()
@@ -279,6 +323,7 @@ def main_menu():
 def main():
     pygame.mixer.music.load(game_music)
     pygame.mixer.music.play(-1)
+    
     mousetraps_player = []
     n = 5
     mice = [Mouse(use_image=True) for _ in range(n)]  # Player's mice
@@ -290,18 +335,14 @@ def main():
 
     player_kills = 0
     ai_kills = 0
-    generation = 0
-    # Your existing setup here...
     global log_data
     log_data = pd.DataFrame(columns=['Generation', 'AI_Kills', 'Player_Kills', 'Average_AI_Health'])
 
-    # Periodically log the data after each generation
     generation = 0
-    
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                # visualize_performance()
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -327,15 +368,18 @@ def main():
                 if ai_kills == n:
                     win("AI", n)
 
+        # Genetic Algorithm update. Create a new generation every n frames
+        if generation % 5 == 0:
+            ga.create_new_generation(mice_ai)
+
+        # UI update
         avg_health = sum(mouse.health for mouse in mice_ai) / len(mice_ai) if mice_ai else 0
-        
         log_data = append_log_data(log_data, {
             'Generation': [generation],
             'AI_Kills': [ai_kills],
             'Player_Kills': [player_kills],
             'Average_AI_Health': [avg_health]
         })
-
         generation += 1
 
         screen.fill(BLACK)
@@ -345,9 +389,9 @@ def main():
             mousetrap.draw()
             mousetrap.attack(mice)
 
-        for mousetrap_pos in mousetraps_ai:
+        for mousetrap_pos in ga.population[0]:
             mousetrap = Mousetrap(mousetrap_pos[0], mousetrap_pos[1])
-            mousetrap.draw(offset=SCREEN_WIDTH // 2)
+            mousetrap.draw(offset=0)
             mousetrap.attack(mice_ai)
 
         for enemy in mice:
@@ -362,5 +406,4 @@ def main():
 
         pygame.display.flip()
         clock.tick(FPS)
-
 main_menu()
