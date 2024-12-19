@@ -3,68 +3,72 @@ import sys
 import random
 
 # Initialize Pygame
-pygame.init() #initializing pygame
+pygame.init()
 
 # Screen and grid settings
-SCREEN_WIDTH = 1200  # Secreen Width
-SCREEN_HEIGHT = 600  # Screen height
-GRID_SIZE = 10  # Each grid cell is 50x50
-FPS = 60 #Frames per second
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 600
+GRID_SIZE = 10
+FPS = 60
 
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAY = (200, 200, 200)
 RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
 ORANGE = (250, 156, 28)
 YELLOW = (255, 255, 0)
 
 # Initialize the screen
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT)) #creating the screen
-pygame.display.set_caption("Cat and Mouse Split-Screen Game") #Main screen Text
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Cat and Mouse Split-Screen Game")
 clock = pygame.time.Clock()
 
 # Fonts
 font = pygame.font.Font(None, 48)
-small_font = pygame.font.Font(None, 36)  # Small Font for Instructions
+small_font = pygame.font.Font(None, 36)
 
-# Draw the grid
+# Load sounds
+pygame.mixer.music.load("tracks/background_music_2.mp3")
+game_music = "tracks/background_music_1.mp3"
+enemy_defeat_sound = pygame.mixer.Sound("tracks/mouse_hit5.mp3")
+win_sound = pygame.mixer.Sound("tracks/win_sound.mp3")
+lose_sound = pygame.mixer.Sound("tracks/lose_sound.mp3")
+
+LOSE_DELAY = 500  # 0.5 seconds
+
+# Play main menu music
+pygame.mixer.music.play(-1)
+
+
 def draw_grid(offset=0):
+    """Draws the grid lines on the screen."""
     for x in range(offset, SCREEN_WIDTH // 2 + offset, GRID_SIZE):
         pygame.draw.line(screen, GRAY, (x, 0), (x, SCREEN_HEIGHT))
     for y in range(0, SCREEN_HEIGHT, GRID_SIZE):
         pygame.draw.line(screen, GRAY, (offset, y), (SCREEN_WIDTH // 2 + offset, y))
 
+
 def draw_wall():
+    """Draws the dividing wall between the two halves of the screen."""
     pygame.draw.rect(screen, YELLOW, (SCREEN_WIDTH // 2 - 2, 0, 4, SCREEN_HEIGHT))
 
-# --- Load Music and Sound Effects ---
-pygame.mixer.music.load("tracks/background_music_2.mp3")  # Main menu background music
-game_music = "tracks/background_music_1.mp3"  # In-game background music
-# tower_place_sound = pygame.mixer.Sound("tower_place.wav")  # Sound for placing a tower
-enemy_defeat_sound = pygame.mixer.Sound("tracks/mouse_hit5.mp3")  # Sound for enemy defeat
-win_sound = pygame.mixer.Sound("tracks/win_sound.mp3")  # Sound for player win
-lose_sound = pygame.mixer.Sound("tracks/lose_sound.mp3")  # Sound for AI win
 
-# Add a delay before playing the losing sound (in milliseconds)
-LOSE_DELAY = 500  # 0.5 seconds
-
-# Play main menu music
-pygame.mixer.music.play(-1)  # Loop forever
-
-# Enemy class
 class Mouse:
-    def __init__(self, offset=0):
+    def __init__(self, offset=0, use_image=False):
         self.x = random.randint(0, SCREEN_WIDTH // GRID_SIZE // 2 - 1) * GRID_SIZE + offset
         self.y = random.randint(0, SCREEN_HEIGHT // GRID_SIZE - 1) * GRID_SIZE
         self.speed = 2
         self.health = 100
         self.direction = random.choice(["UP", "DOWN", "LEFT", "RIGHT"])
         self.offset = offset
+        self.use_image = use_image
+        if self.use_image:
+            self.image = pygame.image.load("C:\Local Disk E\Github\Cat-and-Mouse-Game-using-Genetic-Algorithm\images\mouse_image.png")  # Load your mouse image here
+            self.image = pygame.transform.scale(self.image, (GRID_SIZE, GRID_SIZE))
 
     def move(self):
+        """Moves the mouse randomly within the grid."""
         if self.direction == "UP":
             self.y -= self.speed
         elif self.direction == "DOWN":
@@ -78,7 +82,7 @@ class Mouse:
         if random.randint(0, 50) == 0:
             self.direction = random.choice(["UP", "DOWN", "LEFT", "RIGHT"])
 
-        # Keep enemy within grid bounds
+        # Keep mouse within grid bounds
         if self.x < self.offset:
             self.x = self.offset
             self.direction = "RIGHT"
@@ -94,39 +98,50 @@ class Mouse:
             self.direction = "UP"
 
     def draw(self):
-        pygame.draw.rect(screen, GRAY, (self.x, self.y, GRID_SIZE, GRID_SIZE))
+        """Draws the mouse and its health bar."""
+        if self.use_image:
+            screen.blit(self.image, (self.x, self.y))  # Draw the mouse image
+        else:
+            pygame.draw.rect(screen, GRAY, (self.x, self.y, GRID_SIZE, GRID_SIZE))  # Draw the gray box
+
+        # Draw health bar
         pygame.draw.rect(screen, RED, (self.x, self.y - 5, GRID_SIZE * (self.health / 100), 5))
 
     def take_damage(self, damage):
+        """Reduces the mouse's health."""
         self.health -= damage
 
-# MouseTrap class
+
 class Mousetrap:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.range = GRID_SIZE * 3
-        self.damage = 20
-        self.cooldown = 30
-        self.timer = 0
+        self.range = GRID_SIZE * 3  # Effective range of the trap
+        self.damage = 5  # Incremental damage per attack
+        self.cooldown = 40  # Time (in frames) between attacks
+        self.timer = 0  # Timer to handle cooldowns
 
     def attack(self, mice):
-        if self.timer == 0:
+        """Attacks mice within range incrementally."""
+        if self.timer == 0:  # If trap is ready to attack
             for mouse in mice:
+                # Calculate Euclidean distance to the mouse
                 distance = ((self.x - mouse.x) ** 2 + (self.y - mouse.y) ** 2) ** 0.5
-                if distance <= self.range:
-                    mouse.take_damage(self.damage)
-                    pygame.mixer.Sound.play(enemy_defeat_sound)
-                    self.timer = self.cooldown
-                    return True
+                if distance <= self.range:  # If mouse is in range
+                    mouse.take_damage(self.damage)  # Apply incremental damage
+                    pygame.mixer.Sound.play(enemy_defeat_sound)  # Play attack sound
+                    self.timer = self.cooldown  # Reset cooldown timer
+                    break  # Stop attacking other mice this frame
+
+        # Decrease timer if not ready yet
         if self.timer > 0:
             self.timer -= 1
-        return False
 
     def draw(self, offset=0):
+        """Draws the mousetrap."""
         pygame.draw.circle(screen, ORANGE, (self.x + offset, self.y), GRID_SIZE // 2)
 
-# Genetic Algorithm for AI mousetrap placement
+
 class GeneticAlgorithm:
     def __init__(self, population_size, mutation_rate):
         self.population_size = population_size
@@ -134,6 +149,7 @@ class GeneticAlgorithm:
         self.population = []
 
     def initialize_population(self):
+        """Creates the initial population of mousetrap placements."""
         for _ in range(self.population_size):
             mousetraps = [
                 (random.randint(0, SCREEN_WIDTH // GRID_SIZE // 2 - 1) * GRID_SIZE + SCREEN_WIDTH // 2 + GRID_SIZE // 2,
@@ -142,30 +158,25 @@ class GeneticAlgorithm:
             ]
             self.population.append(mousetraps)
 
-def win(winner, n):
-    pygame.mixer.music.stop()  # Stop game music
 
-    if winner == "AI":  # Check if the AI wins
-        pygame.time.delay(LOSE_DELAY)  # Add delay before playing lose sound
-        pygame.mixer.Sound.play(lose_sound)  # Play lose sound
+def win(winner, n):
+    pygame.mixer.music.stop()
+    if winner == "AI":
+        pygame.time.delay(LOSE_DELAY)
+        pygame.mixer.Sound.play(lose_sound)
     else:
+        pygame.time.delay(LOSE_DELAY)
         pygame.mixer.Sound.play(win_sound)
-    """
-    Displays the winning message and waits for the player to quit or restart.
-    :param winner: "Player" or "AI"
-    :param n: Number of kills required to win
-    """
+
     font_large = pygame.font.Font(None, 72)
     font_small = pygame.font.Font(None, 36)
 
     while True:
         screen.fill(BLACK)
-        # Display win text
         win_text = font_large.render(f"{winner} Wins!", True, WHITE)
         kills_text = font_small.render(f"Total Kills: {n}", True, WHITE)
         restart_text = font_small.render("Press ENTER to Restart or ESC to Quit", True, WHITE)
 
-        # Center the text
         screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
         screen.blit(kills_text, (SCREEN_WIDTH // 2 - kills_text.get_width() // 2, SCREEN_HEIGHT // 2))
         screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
@@ -177,19 +188,20 @@ def win(winner, n):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:  # Restart the game
+                if event.key == pygame.K_RETURN:
                     main()
-                if event.key == pygame.K_ESCAPE:  # Go to main menu
+                if event.key == pygame.K_ESCAPE:
                     main_menu()
 
-# Main game loop
+
 def main():
     pygame.mixer.music.load(game_music)
-    pygame.mixer.music.play(-1)  # Start game music
+    pygame.mixer.music.play(-1)
     mousetraps_player = []
-    n = 5  # Number of enemies
-    mice = [Mouse() for _ in range(n)]
-    mice_ai = [Mouse(offset=SCREEN_WIDTH // 2) for _ in range(n)]
+    n = 5
+    mice = [Mouse(use_image=True) for _ in range(n)]  # Player's mice
+    mice_ai = [Mouse(offset=SCREEN_WIDTH // 2, use_image=True) for _ in range(n)]  # AI's mice
+
 
     ga = GeneticAlgorithm(population_size=n, mutation_rate=0.1)
     ga.initialize_population()
@@ -210,25 +222,22 @@ def main():
                     grid_y = (mouse_y // GRID_SIZE) * GRID_SIZE + GRID_SIZE // 2
                     mousetraps_player.append(Mousetrap(grid_x, grid_y))
 
-        # Update enemies and check player win condition
         for mouse in mice[:]:
             mouse.move()
             if mouse.health <= 0:
                 mice.remove(mouse)
                 player_kills += 1
-                if player_kills == n:  # Player wins
+                if player_kills == n:
                     win("Player", n)
 
-        # Update AI enemies and check AI win condition
         for mouse in mice_ai[:]:
             mouse.move()
             if mouse.health <= 0:
                 mice_ai.remove(mouse)
                 ai_kills += 1
-                if ai_kills == n:  # AI wins
+                if ai_kills == n:
                     win("AI", n)
 
-        # Draw game elements
         screen.fill(BLACK)
         draw_wall()
 
@@ -246,32 +255,32 @@ def main():
         for enemy in mice_ai:
             enemy.draw()
 
-        # Display scores
-        font_small = pygame.font.Font(None, 36)
-        player_score_text = font_small.render(f"Player's Score: {player_kills}", True, WHITE)
-        ai_score_text = font_small.render(f"AI's Score: {ai_kills}", True, WHITE)
+        player_score_text = small_font.render(f"Player's Score: {player_kills}", True, WHITE)
+        ai_score_text = small_font.render(f"AI's Score: {ai_kills}", True, WHITE)
         screen.blit(player_score_text, (10, 10))
         screen.blit(ai_score_text, (SCREEN_WIDTH // 2 + 10, 10))
 
         pygame.display.flip()
         clock.tick(FPS)
 
-# Main Menu
+
 def main_menu():
     while True:
         screen.fill(BLACK)
         title_text = font.render("Cat And Mouse Game", True, WHITE)
         start_text = small_font.render("Press ENTER to Start", True, WHITE)
         screen.blit(title_text, (SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2 - 50))
-        screen.blit(start_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 + 50))
-        pygame.display.flip()
+        screen.blit(start_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                main()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    main()
 
-if __name__ == "__main__":
-    main_menu()
+        pygame.display.flip()
+
+
+main_menu()
