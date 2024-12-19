@@ -206,7 +206,7 @@ def win(winner, n):
         screen.fill(BLACK)
         win_text = font_large.render(f"{winner} Wins!", True, WHITE)
         kills_text = font_small.render(f"Total Kills: {n}", True, WHITE)
-        restart_text = font_small.render("Press ENTER to Restart or ESC to Quit", True, WHITE)
+        restart_text = font_small.render("Press BACKSPACE to Play Again\n ESC to Quit and Press R to show the performance", True, WHITE)
 
         screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
         screen.blit(kills_text, (SCREEN_WIDTH // 2 - kills_text.get_width() // 2, SCREEN_HEIGHT // 2))
@@ -219,10 +219,14 @@ def win(winner, n):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
+                if event.key == pygame.K_BACKSPACE:
                     main()
                 if event.key == pygame.K_ESCAPE:
-                    main_menu()
+                    pygame.quit()
+                    sys.exit()
+                if event.key == pygame.K_r:
+                    visualize_performance()
+                    main()
 
 
 def visualize_performance():
@@ -265,8 +269,11 @@ def main_menu():
                 if event.key == pygame.K_RETURN:
                     main()
                 if event.key == pygame.K_ESCAPE:
+
                     pygame.quit()
                     sys.exit()
+                # if event.key == pygame.K_r:
+                #     visualize_performance()
 
 def main():
     pygame.mixer.music.load(game_music)
@@ -287,7 +294,7 @@ def main():
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                visualize_performance()
+                # visualize_performance()
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -348,31 +355,5 @@ def main():
 
         pygame.display.flip()
         clock.tick(FPS)
-
-
-def main_menu():
-    while True:
-        screen.fill(BLACK)
-        title_text = font.render("Cat And Mouse Game", True, WHITE)
-        play_text = small_font.render("Press ENTER to Play", True, WHITE)
-        quit_text = small_font.render("Press ESC to Quit", True, WHITE)
-
-        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 4))
-        screen.blit(play_text, (SCREEN_WIDTH // 2 - play_text.get_width() // 2, SCREEN_HEIGHT // 2))
-        screen.blit(quit_text, (SCREEN_WIDTH // 2 - quit_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
-
-        pygame.display.flip()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    main()
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-
 
 main_menu()
