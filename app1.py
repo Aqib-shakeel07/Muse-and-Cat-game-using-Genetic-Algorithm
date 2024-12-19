@@ -1,6 +1,8 @@
 import pygame
 import sys
 import random
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # Initialize Pygame
 pygame.init()
@@ -40,6 +42,15 @@ LOSE_DELAY = 500  # 0.5 seconds
 # Play main menu music
 pygame.mixer.music.play(-1)
 
+# Initialize logging DataFrame
+log_data = pd.DataFrame(columns=['Generation', 'AI_Kills', 'Player_Kills', 'Average_AI_Health'])
+
+# Helper function to append non-empty rows to DataFrame
+def append_log_data(dataframe, new_data):
+    new_data_df = pd.DataFrame(new_data)
+    if not new_data_df.dropna(how='all').empty:
+        return pd.concat([dataframe, new_data_df], ignore_index=True)
+    return dataframe
 
 def draw_grid(offset=0):
     """Draws the grid lines on the screen."""
@@ -48,11 +59,9 @@ def draw_grid(offset=0):
     for y in range(0, SCREEN_HEIGHT, GRID_SIZE):
         pygame.draw.line(screen, GRAY, (offset, y), (SCREEN_WIDTH // 2 + offset, y))
 
-
 def draw_wall():
     """Draws the dividing wall between the two halves of the screen."""
     pygame.draw.rect(screen, YELLOW, (SCREEN_WIDTH // 2 - 2, 0, 4, SCREEN_HEIGHT))
-
 
 class Mouse:
     def __init__(self, offset=0, use_image=False):
@@ -64,7 +73,7 @@ class Mouse:
         self.offset = offset
         self.use_image = use_image
         if self.use_image:
-            self.image = pygame.image.load("C:\Local Disk E\Github\Cat-and-Mouse-Game-using-Genetic-Algorithm\images\mouse_image.png")  # Load your mouse image here
+            self.image = pygame.image.load("images/mouse_image.png")  # Load your mouse image here
             self.image = pygame.transform.scale(self.image, (GRID_SIZE, GRID_SIZE))
 
     def move(self):
@@ -194,6 +203,21 @@ def win(winner, n):
                     main_menu()
 
 
+def visualize_performance():
+    """Visualizes the logged performance data."""
+    global log_data
+    plt.figure(figsize=(10, 6))
+    plt.plot(log_data['Generation'], log_data['AI_Kills'], label='AI Kills', color='red')
+    plt.plot(log_data['Generation'], log_data['Player_Kills'], label='Player Kills', color='blue')
+    plt.plot(log_data['Generation'], log_data['Average_AI_Health'], label='Avg AI Health', color='green')
+    plt.xlabel('Generation')
+    plt.ylabel('Metrics')
+    plt.title('AI Performance Metrics')
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+
 def main():
     pygame.mixer.music.load(game_music)
     pygame.mixer.music.play(-1)
@@ -202,17 +226,18 @@ def main():
     mice = [Mouse(use_image=True) for _ in range(n)]  # Player's mice
     mice_ai = [Mouse(offset=SCREEN_WIDTH // 2, use_image=True) for _ in range(n)]  # AI's mice
 
-
     ga = GeneticAlgorithm(population_size=n, mutation_rate=0.1)
     ga.initialize_population()
     mousetraps_ai = ga.population[0]
 
     player_kills = 0
     ai_kills = 0
+    generation = 0
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                visualize_performance()
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -237,6 +262,17 @@ def main():
                 ai_kills += 1
                 if ai_kills == n:
                     win("AI", n)
+
+        avg_health = sum(mouse.health for mouse in mice_ai) / len(mice_ai) if mice_ai else 0
+        global log_data
+        log_data = append_log_data(log_data, {
+            'Generation': [generation],
+            'AI_Kills': [ai_kills],
+            'Player_Kills': [player_kills],
+            'Average_AI_Health': [avg_health]
+        })
+
+        generation += 1
 
         screen.fill(BLACK)
         draw_wall()
