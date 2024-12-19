@@ -325,7 +325,7 @@ def main():
     pygame.mixer.music.play(-1)
     
     mousetraps_player = []
-    n = 5
+    n = 15
     mice = [Mouse(use_image=True) for _ in range(n)]  # Player's mice
     mice_ai = [Mouse(offset=SCREEN_WIDTH // 2, use_image=True) for _ in range(n)]  # AI's mice
 
@@ -339,6 +339,7 @@ def main():
     log_data = pd.DataFrame(columns=['Generation', 'AI_Kills', 'Player_Kills', 'Average_AI_Health'])
 
     generation = 0
+    f=3 #frequency of generating a new generation
 
     while True:
         for event in pygame.event.get():
@@ -367,9 +368,10 @@ def main():
                 ai_kills += 1
                 if ai_kills == n:
                     win("AI", n)
-
+        
         # Genetic Algorithm update. Create a new generation every n frames
-        if generation % 5 == 0:
+        
+        if generation % f == 0:
             ga.create_new_generation(mice_ai)
 
         # UI update
