@@ -54,9 +54,8 @@ LOSE_DELAY = 500  # 0.5 seconds
 
 # Play main menu music
 pygame.mixer.music.play(-1)
-
 # Define the file path for logs
-LOG_FILE_PATH = "game_logs.csv"
+LOG_FILE_PATH = "logs/game_logs.csv"
 # Helper function to append non-empty rows to DataFrame and save to file
 def append_log_data(dataframe, new_data):
     try:
@@ -185,8 +184,8 @@ class GeneticAlgorithm:
         """Creates the initial population of mousetrap placements."""
         for _ in range(self.population_size):
             mousetraps = [
-                (random.randint(0, SCREEN_WIDTH // GRID_SIZE // 2 - 1) * GRID_SIZE + SCREEN_WIDTH // 2 + GRID_SIZE // 2,
-                 random.randint(0, SCREEN_HEIGHT // GRID_SIZE - 1) * GRID_SIZE + GRID_SIZE // 2)
+                (random.randint(SCREEN_WIDTH // 2 // GRID_SIZE, SCREEN_WIDTH // GRID_SIZE - 1) * GRID_SIZE,
+                random.randint(0, SCREEN_HEIGHT // GRID_SIZE - 1) * GRID_SIZE)
                 for _ in range(random.randint(5, 10))
             ]
             self.population.append(mousetraps)
