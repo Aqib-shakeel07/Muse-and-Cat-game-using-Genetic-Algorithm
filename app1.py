@@ -5,7 +5,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Initialize Pygame
-pygame.init()
+try:
+    pygame.init()
+except pygame.error as e:
+    print(f"Error initializing Pygame: {e}")
+    sys.exit()
 
 # Screen and grid settings
 SCREEN_WIDTH = 1200
@@ -27,15 +31,23 @@ pygame.display.set_caption("Cat and Mouse Split-Screen Game")
 clock = pygame.time.Clock()
 
 # Fonts
-font = pygame.font.Font(None, 48)
-small_font = pygame.font.Font(None, 36)
+try:
+    font = pygame.font.Font(None, 48)
+    small_font = pygame.font.Font(None, 36)
+except pygame.error as e:
+    print(f"Error loading fonts: {e}")
+    sys.exit()
 
 # Load sounds
-pygame.mixer.music.load("tracks/background_music_2.mp3")
-game_music = "tracks/background_music_1.mp3"
-enemy_defeat_sound = pygame.mixer.Sound("tracks/mouse_hit5.mp3")
-win_sound = pygame.mixer.Sound("tracks/win_sound.mp3")
-lose_sound = pygame.mixer.Sound("tracks/lose_sound.mp3")
+try:
+    pygame.mixer.music.load("tracks/background_music_2.mp3")
+    game_music = "tracks/background_music_1.mp3"
+    enemy_defeat_sound = pygame.mixer.Sound("tracks/mouse_hit5.mp3")
+    win_sound = pygame.mixer.Sound("tracks/win_sound.mp3")
+    lose_sound = pygame.mixer.Sound("tracks/lose_sound.mp3")
+except pygame.error as e:
+    print(f"Error loading sound files: {e}")
+    sys.exit()
 
 LOSE_DELAY = 500  # 0.5 seconds
 
@@ -47,10 +59,16 @@ log_data = pd.DataFrame(columns=['Generation', 'AI_Kills', 'Player_Kills', 'Aver
 
 # Helper function to append non-empty rows to DataFrame
 def append_log_data(dataframe, new_data):
-    new_data_df = pd.DataFrame(new_data)
-    if not new_data_df.dropna(how='all').empty:
-        return pd.concat([dataframe, new_data_df], ignore_index=True)
-    return dataframe
+    try:
+        new_data_df = pd.DataFrame(new_data)
+        # Exclude empty or all-NA rows explicitly before concatenating
+        new_data_df = new_data_df.dropna(how='all')
+        if not new_data_df.empty:
+            return pd.concat([dataframe, new_data_df], ignore_index=True)
+        return dataframe
+    except Exception as e:
+        print(f"Error appending log data: {e}")
+        return dataframe
 
 def draw_grid(offset=0):
     """Draws the grid lines on the screen."""
@@ -73,8 +91,12 @@ class Mouse:
         self.offset = offset
         self.use_image = use_image
         if self.use_image:
-            self.image = pygame.image.load("images/mouse_image.png")  # Load your mouse image here
-            self.image = pygame.transform.scale(self.image, (GRID_SIZE, GRID_SIZE))
+            try:
+                self.image = pygame.image.load("images/mouse_image.png")  # Load your mouse image here
+                self.image = pygame.transform.scale(self.image, (GRID_SIZE, GRID_SIZE))
+            except pygame.error as e:
+                print(f"Error loading mouse image: {e}")
+                self.use_image = False  # Fallback to default square if image fails
 
     def move(self):
         """Moves the mouse randomly within the grid."""
@@ -205,18 +227,46 @@ def win(winner, n):
 
 def visualize_performance():
     """Visualizes the logged performance data."""
-    global log_data
-    plt.figure(figsize=(10, 6))
-    plt.plot(log_data['Generation'], log_data['AI_Kills'], label='AI Kills', color='red')
-    plt.plot(log_data['Generation'], log_data['Player_Kills'], label='Player Kills', color='blue')
-    plt.plot(log_data['Generation'], log_data['Average_AI_Health'], label='Avg AI Health', color='green')
-    plt.xlabel('Generation')
-    plt.ylabel('Metrics')
-    plt.title('AI Performance Metrics')
-    plt.legend()
-    plt.grid()
-    plt.show()
+    try:
+        global log_data
+        plt.figure(figsize=(10, 6))
+        plt.plot(log_data['Generation'], log_data['AI_Kills'], label='AI Kills', color='red')
+        plt.plot(log_data['Generation'], log_data['Player_Kills'], label='Player Kills', color='blue')
+        plt.plot(log_data['Generation'], log_data['Average_AI_Health'], label='Avg AI Health', color='green')
+        plt.xlabel('Generation')
+        plt.ylabel('Metrics')
+        plt.title('AI Performance Metrics')
+        plt.legend()
+        plt.grid()
+        plt.show()
+    except Exception as e:
+        print(f"Error visualizing performance data: {e}")
 
+# Main function and menu remain unchanged
+
+def main_menu():
+    while True:
+        screen.fill(BLACK)
+        title_text = font.render("Cat And Mouse Game", True, WHITE)
+        play_text = small_font.render("Press ENTER to Play", True, WHITE)
+        quit_text = small_font.render("Press ESC to Quit", True, WHITE)
+
+        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 4))
+        screen.blit(play_text, (SCREEN_WIDTH // 2 - play_text.get_width() // 2, SCREEN_HEIGHT // 2))
+        screen.blit(quit_text, (SCREEN_WIDTH // 2 - quit_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    main()
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
 
 def main():
     pygame.mixer.music.load(game_music)
@@ -304,9 +354,14 @@ def main_menu():
     while True:
         screen.fill(BLACK)
         title_text = font.render("Cat And Mouse Game", True, WHITE)
-        start_text = small_font.render("Press ENTER to Start", True, WHITE)
-        screen.blit(title_text, (SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2 - 50))
-        screen.blit(start_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2))
+        play_text = small_font.render("Press ENTER to Play", True, WHITE)
+        quit_text = small_font.render("Press ESC to Quit", True, WHITE)
+
+        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 4))
+        screen.blit(play_text, (SCREEN_WIDTH // 2 - play_text.get_width() // 2, SCREEN_HEIGHT // 2))
+        screen.blit(quit_text, (SCREEN_WIDTH // 2 - quit_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
+
+        pygame.display.flip()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -315,8 +370,9 @@ def main_menu():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     main()
-
-        pygame.display.flip()
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
 
 
 main_menu()
