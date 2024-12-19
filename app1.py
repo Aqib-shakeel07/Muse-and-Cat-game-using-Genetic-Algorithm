@@ -3,6 +3,7 @@ import sys
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 # Initialize Pygame
 try:
@@ -54,17 +55,18 @@ LOSE_DELAY = 500  # 0.5 seconds
 # Play main menu music
 pygame.mixer.music.play(-1)
 
-# Initialize logging DataFrame
-log_data = pd.DataFrame(columns=['Generation', 'AI_Kills', 'Player_Kills', 'Average_AI_Health'])
-
-# Helper function to append non-empty rows to DataFrame
+# Define the file path for logs
+LOG_FILE_PATH = "game_logs.csv"
+# Helper function to append non-empty rows to DataFrame and save to file
 def append_log_data(dataframe, new_data):
     try:
         new_data_df = pd.DataFrame(new_data)
         # Exclude empty or all-NA rows explicitly before concatenating
         new_data_df = new_data_df.dropna(how='all')
         if not new_data_df.empty:
-            return pd.concat([dataframe, new_data_df], ignore_index=True)
+            dataframe = pd.concat([dataframe, new_data_df], ignore_index=True)
+            # Save the updated dataframe to the log file
+            dataframe.to_csv(LOG_FILE_PATH, index=False)  # Save as CSV file
         return dataframe
     except Exception as e:
         print(f"Error appending log data: {e}")
@@ -226,7 +228,7 @@ def win(winner, n):
                     sys.exit()
                 if event.key == pygame.K_r:
                     visualize_performance()
-                    main()
+                    main_menu()
 
 
 def visualize_performance():
@@ -290,7 +292,13 @@ def main():
     player_kills = 0
     ai_kills = 0
     generation = 0
+    # Your existing setup here...
+    global log_data
+    log_data = pd.DataFrame(columns=['Generation', 'AI_Kills', 'Player_Kills', 'Average_AI_Health'])
 
+    # Periodically log the data after each generation
+    generation = 0
+    
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -321,7 +329,7 @@ def main():
                     win("AI", n)
 
         avg_health = sum(mouse.health for mouse in mice_ai) / len(mice_ai) if mice_ai else 0
-        global log_data
+        
         log_data = append_log_data(log_data, {
             'Generation': [generation],
             'AI_Kills': [ai_kills],
