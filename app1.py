@@ -95,11 +95,19 @@ class Mouse:
         self.use_image = use_image
         if self.use_image:
             try:
-                self.image = pygame.image.load("images/mouse_image.png")  # Load your mouse image here
-                self.image = pygame.transform.scale(self.image, (GRID_SIZE, GRID_SIZE))
+                # Load images for each direction
+                self.images = {
+                    "UP": pygame.image.load("images/mouse_up.png"),
+                    "DOWN": pygame.image.load("images/mouse_down.png"),
+                    "LEFT": pygame.image.load("images/mouse_left.png"),
+                    "RIGHT": pygame.image.load("images/mouse_right.png")
+                }
+                # Scale images to grid size
+                self.images = {key: pygame.transform.scale(img, (GRID_SIZE, GRID_SIZE)) for key, img in self.images.items()}
+                self.image = self.images[self.direction]
             except pygame.error as e:
-                print(f"Error loading mouse image: {e}")
-                self.use_image = False  # Fallback to default square if image fails
+                print(f"Error loading mouse images: {e}")
+                self.use_image = False  # Fallback to default square if image loading fails
 
     def move(self):
         """Moves the mouse randomly within the grid."""
@@ -112,9 +120,11 @@ class Mouse:
         elif self.direction == "RIGHT":
             self.x += self.speed
 
-        # Randomly change direction
+    # Randomly change direction
         if random.randint(0, 50) == 0:
             self.direction = random.choice(["UP", "DOWN", "LEFT", "RIGHT"])
+            if self.use_image:
+                self.image = self.images[self.direction]  # Update the image based on the direction
 
         # Keep mouse within grid bounds
         if self.x < self.offset:
