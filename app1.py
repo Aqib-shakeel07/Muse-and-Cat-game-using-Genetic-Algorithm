@@ -264,15 +264,15 @@ def win(winner, n):
         screen.fill(BLACK)
         win_text = font_large.render(f"{winner} Wins!", True, WHITE)
         kills_text = font_small.render(f"Total Kills: {n}", True, WHITE)
-        restart_text = font_xsmall.render("Press BACKSPACE to Main Menu", True, WHITE)
-        restart_text2 = font_xsmall.render("Press R to show Performance Graph", True, WHITE)
+        restart_text = font_xsmall.render("Press BACKSPACE for Main Menu", True, WHITE)
+        restart_text2 = font_xsmall.render("Press S to show Performance Graph", True, WHITE)
         restart_text3 = font_xsmall.render("Press ESC to Quit", True, WHITE)
 
         screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 4))
         screen.blit(kills_text, (SCREEN_WIDTH // 2 - kills_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
-        screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
-        screen.blit(restart_text2, (SCREEN_WIDTH // 2 - restart_text2.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
-        screen.blit(restart_text3, (SCREEN_WIDTH // 2 - restart_text3.get_width() // 2, SCREEN_HEIGHT // 2 + 150))
+        screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 30))
+        screen.blit(restart_text2, (SCREEN_WIDTH // 2 - restart_text2.get_width() // 2, SCREEN_HEIGHT // 2 + 60))
+        screen.blit(restart_text3, (SCREEN_WIDTH // 2 - restart_text3.get_width() // 2, SCREEN_HEIGHT // 2 + 90))
 
         pygame.display.flip()
 
@@ -286,7 +286,7 @@ def win(winner, n):
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                if event.key == pygame.K_r:
+                if event.key == pygame.K_s:
                     visualize_performance()
                     main_menu()
 
