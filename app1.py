@@ -15,7 +15,7 @@ except pygame.error as e:
 # Screen and grid settings
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
-GRID_SIZE = 10
+GRID_SIZE = 50
 FPS = 60
 
 # Colors
@@ -33,8 +33,10 @@ clock = pygame.time.Clock()
 
 # Fonts
 try:
-    font = pygame.font.Font(None, 48)
-    small_font = pygame.font.Font(None, 36)
+    font = pygame.font.Font("fonts/Manti Sans Bold Demo.otf", 62)
+    # small_font = pygame.font.Font("fonts/Manti Sans Light Demo.otf", 20) 
+    xsmall_font = pygame.font.Font("fonts/Manti Sans Light Demo.otf", 20)
+
 except pygame.error as e:
     print(f"Error loading fonts: {e}")
     sys.exit()
@@ -244,18 +246,23 @@ def win(winner, n):
         pygame.time.delay(LOSE_DELAY)
         pygame.mixer.Sound.play(win_sound)
 
-    font_large = pygame.font.Font(None, 72)
-    font_small = pygame.font.Font(None, 36)
+    font_large = pygame.font.Font("fonts/Manti Sans Bold Demo.otf", 72)
+    font_small = pygame.font.Font("fonts/Manti Sans Black Demo.otf", 36)
+    font_xsmall = pygame.font.Font("fonts/Manti Sans Light Demo.otf", 20)
 
     while True:
         screen.fill(BLACK)
         win_text = font_large.render(f"{winner} Wins!", True, WHITE)
         kills_text = font_small.render(f"Total Kills: {n}", True, WHITE)
-        restart_text = font_small.render("Press BACKSPACE to Play Again\n ESC to Quit and Press R to show the performance", True, WHITE)
+        restart_text = font_xsmall.render("Press BACKSPACE to Main Menu", True, WHITE)
+        restart_text2 = font_xsmall.render("Press R to show Performance Graph", True, WHITE)
+        restart_text3 = font_xsmall.render("Press ESC to Quit", True, WHITE)
 
-        screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
-        screen.blit(kills_text, (SCREEN_WIDTH // 2 - kills_text.get_width() // 2, SCREEN_HEIGHT // 2))
+        screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 4))
+        screen.blit(kills_text, (SCREEN_WIDTH // 2 - kills_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
         screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
+        screen.blit(restart_text2, (SCREEN_WIDTH // 2 - restart_text2.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
+        screen.blit(restart_text3, (SCREEN_WIDTH // 2 - restart_text3.get_width() // 2, SCREEN_HEIGHT // 2 + 150))
 
         pygame.display.flip()
 
@@ -265,7 +272,7 @@ def win(winner, n):
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
-                    main()
+                    main_menu()
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
@@ -297,8 +304,8 @@ def main_menu():
     while True:
         screen.fill(BLACK)
         title_text = font.render("Cat And Mouse Game", True, WHITE)
-        play_text = small_font.render("Press ENTER to Play", True, WHITE)
-        quit_text = small_font.render("Press ESC to Quit", True, WHITE)
+        play_text = xsmall_font.render("Press ENTER to Play", True, WHITE)
+        quit_text = xsmall_font.render("Press ESC to Quit", True, WHITE)
 
         screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 4))
         screen.blit(play_text, (SCREEN_WIDTH // 2 - play_text.get_width() // 2, SCREEN_HEIGHT // 2))
@@ -401,8 +408,8 @@ def main():
         for enemy in mice_ai:
             enemy.draw()
 
-        player_score_text = small_font.render(f"Player's Score: {player_kills}", True, WHITE)
-        ai_score_text = small_font.render(f"AI's Score: {ai_kills}", True, WHITE)
+        player_score_text = xsmall_font.render(f"Player's Score: {player_kills}", True, WHITE)
+        ai_score_text = xsmall_font.render(f"AI's Score: {ai_kills}", True, WHITE)
         screen.blit(player_score_text, (10, 10))
         screen.blit(ai_score_text, (SCREEN_WIDTH // 2 + 10, 10))
 
