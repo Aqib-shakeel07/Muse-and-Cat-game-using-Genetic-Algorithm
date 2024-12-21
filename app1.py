@@ -15,7 +15,7 @@ except pygame.error as e:
 # Screen and grid settings
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
-GRID_SIZE = 50
+GRID_SIZE = 10
 FPS = 60
 
 # Colors
@@ -356,7 +356,7 @@ def main():
     log_data = pd.DataFrame(columns=['Generation', 'AI_Kills', 'Player_Kills', 'Average_AI_Health'])
 
     generation = 0
-    f=3 #frequency of generating a new generation
+    f=10 #frequency of generating a new generation
 
     while True:
         for event in pygame.event.get():
