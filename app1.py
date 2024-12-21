@@ -356,7 +356,7 @@ def main():
     log_data = pd.DataFrame(columns=['Generation', 'AI_Kills', 'Player_Kills', 'Average_AI_Health'])
 
     generation = 0
-    f=10 #frequency of generating a new generation
+    f=5 #frequency of generating a new generation
 
     while True:
         for event in pygame.event.get():
