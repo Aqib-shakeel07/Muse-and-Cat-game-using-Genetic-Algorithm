@@ -1,16 +1,18 @@
 ---
 
+---
+
 # Cat and Mouse Split-Screen Game 🎮
 
-A split-screen **Cat and Mouse game** built using Python's Pygame library. The game allows players to place mousetraps strategically to eliminate enemies (mouse) while competing against an AI using a **genetic algorithm** for mousetrap placement.
+A split-screen **Cat and Mouse game** built using Python's Pygame library. The game allows players to place mousetraps strategically to eliminate enemies (mice) while competing against an AI using a **genetic algorithm** for mousetrap placement.
 
 ## Features
 
 - 🎯 **Split-Screen Gameplay**: Compete against the AI in a split-screen environment.
 - 🧠 **Genetic Algorithm**: The AI uses a genetic algorithm to decide optimal mousetrap placement.
-- 💥 **mousetrap Defense Mechanics**: Place mousetraps manually to attack and defeat incoming enemies (mouse).
+- 💥 **Mousetrap Defense Mechanics**: Place mousetraps manually to attack and defeat incoming enemies (mice).
 - 🔊 **Sound Effects and Music**: Background music and effects enhance gameplay.
-- 🏆 **Dynamic Win Conditions**: Compete to eliminate a set number of enemies (mouse) before the AI does.
+- 🏆 **Dynamic Win Conditions**: Compete to eliminate a set number of enemies (mice) before the AI does.
 
 ---
 
@@ -20,19 +22,19 @@ A split-screen **Cat and Mouse game** built using Python's Pygame library. The g
    - Run the Python script.
    - Press `ENTER` at the main menu to begin.
 
-2. **Placing mousetraps**:
+2. **Placing Mousetraps**:
    - Use the **mouse** to click on the left side of the screen (Player's side) to place mousetraps.
-   - mousetraps will automatically attack nearby enemies (mouse).
+   - Mousetraps will automatically attack nearby enemies (mice).
 
 3. **Objective**:
-   - Eliminate **5 enemies (mouse)** before the AI to win the game.
+   - Eliminate **5 enemies (mice)** before the AI to win the game.
 
 4. **AI Side**:
-   - The AI will automatically place mousetraps and eliminate enemies (mouse) using its pre-calculated strategy.
+   - The AI will automatically place mousetraps and eliminate enemies (mice) using its pre-calculated strategy.
 
 5. **Winning**:
-   - If you defeat all enemies (mouse) first, you win.
-   - If the AI eliminates all enemies (mouse) first, the AI wins.
+   - If you defeat all enemies (mice) first, you win.
+   - If the AI eliminates all enemies (mice) first, the AI wins.
 
 ---
 
@@ -54,7 +56,7 @@ A split-screen **Cat and Mouse game** built using Python's Pygame library. The g
 1. Install Python and Pygame:
    ```bash
    pip install pygame
-   ```
+
 
 2. Place all required files (e.g., sound and music files) in a folder structure as follows:
 
@@ -93,7 +95,7 @@ A split-screen **Cat and Mouse game** built using Python's Pygame library. The g
 
 3. Run the game:
    ```bash
-   python cat_mouse_game.py
+   python app.py
    ```
 
 ---
@@ -107,11 +109,11 @@ A split-screen **Cat and Mouse game** built using Python's Pygame library. The g
 
 ### mousetraps:
 - **Player**: Manually places mousetraps using mouse clicks.
-- **AI**: Automatically places mousetraps using a genetic algorithm.
+- **AI**: Automatically places mousetraps using Genetic algorithm.
 
 ### enemies (mouse):
 - Move randomly but stay within grid boundaries.
-- Have health bars that decrease when mousetraps attack.
+- Have health bars that decrease when hit by mousetraps.
 
 ---
 
@@ -134,7 +136,6 @@ A split-screen **Cat and Mouse game** built using Python's Pygame library. The g
 ## Credits
 
 - **Game Development**: Built using Python and Pygame.
-<!-- - **Sound Effects and Music**: (List or link if sourced from a library). -->
 
 ---
 
