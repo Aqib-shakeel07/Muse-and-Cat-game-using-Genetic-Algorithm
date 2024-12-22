@@ -59,15 +59,36 @@ A split-screen **Cat and Mouse game** built using Python's Pygame library. The g
 2. Place all required files (e.g., sound and music files) in a folder structure as follows:
 
    ```
-   game_folder/
-   ├── bulk_commit.ps1       # (Optional script for bulk commits)
-   ├── cat_mouse_game.py     # The main game script
+   Cat-and-Mouse-Game-using-Genetic-Algorithm-/
+   ├── app.py     # The main game script
    ├── tracks/
-   │   ├── background_music_1.mp3
-   │   ├── background_music_2.mp3
-   │   ├── enemy_hit5.mp3
-   │   ├── win_sound.mp3
-   │   └── lose_sound.mp3
+   │     ├── background_music_1.mp3
+   │     ├──background_music_2.mp3
+   │     ├──background_music_3.mp3
+   │     ├──game_over.mp3 
+   │     ├──lose_sound.mp3
+   │     ├──mouse_hit5.mp3
+   │     ├──win_sound.mp3
+   │     └──...
+   ├── images/
+   │     ├── mouse_up.png
+   │     ├── mouse_down.png
+   │     ├── mouse_right.png
+   │     ├── mouse_left.png
+   │     ├── mouse_image.png
+   │     └──... 
+   ├── fonts/
+   │     ├── Manti Sans Black Demo.otf 
+   │     ├── Manti Sans Bold Demo.otf 
+   │     ├── Manti Sans Fixed Demo.otf
+   │     ├── Manti Sans Light Demo.otf 
+   │     ├── Manti Sans Regular Demo.otf
+   │     └──... 
+   ├── logs/
+   │     ├── game_logs.csv
+   │     └──...
+   │   
+   │ 
    ```
 
 3. Run the game:
