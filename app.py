@@ -193,17 +193,17 @@ class GeneticAlgorithm:
         self.population = []
 
     def initialize_population(self):
-        """Create initial random population of mousetraps."""
+        """Create initial random population of mousetraps. within 5 to 10"""
         for _ in range(self.population_size):
             mousetraps = [
                 (random.randint(SCREEN_WIDTH // 2 // GRID_SIZE, SCREEN_WIDTH // GRID_SIZE - 1) * GRID_SIZE,
                  random.randint(0, SCREEN_HEIGHT // GRID_SIZE - 1) * GRID_SIZE)
-                for _ in range(random.randint(5, 10))
+                for _ in range(random.randint(5, 10)) # create 5 to 10 mousetraps in each individual.
             ]
             self.population.append(mousetraps)
 
     def fitness(self, mousetraps, mice):
-        """Calculate fitness as the number of mice in range."""
+        """Calculate fitness based on the number of mice within the range of the mousetraps"""
         fitness = 0
         for trap_x, trap_y in mousetraps:
             for mouse in mice:
@@ -213,19 +213,21 @@ class GeneticAlgorithm:
         return fitness
 
     def select_parents(self, mice):
-        """Select parents based on fitness."""
+        """Select the top 2 individual with the highest fitness as parents"""
         fitness_scores = [self.fitness(mousetraps, mice) for mousetraps in self.population]
         sorted_population = [x for _, x in sorted(zip(fitness_scores, self.population), reverse=True)]
         return sorted_population[:2]
 
     def crossover(self, parent1, parent2):
-        """Perform crossover to create offspring."""
+        """Perform crossover to create offspring"""
+        # Combine two parents mousetraps to create a child.
         split = len(parent1) // 2
         child = parent1[:split] + parent2[split:]
         return child
 
     def mutate(self, mousetraps):
         """Mutate some traps with random positions."""
+        #mutate a random mousetrap position with the probability defined by the mutation rate.
         if random.random() < self.mutation_rate:
             index = random.randint(0, len(mousetraps) - 1)
             mousetraps[index] = (
@@ -234,7 +236,7 @@ class GeneticAlgorithm:
             )
 
     def create_new_generation(self, mice):
-        """Generate a new population."""
+        """Generate a new population based on the crossover and mutation."""
         # Select the two best parents based on fitness
         parent1, parent2 = self.select_parents(mice)
         
