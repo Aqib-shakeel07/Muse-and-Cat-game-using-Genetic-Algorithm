@@ -15,7 +15,7 @@ except pygame.error as e:
 # Screen and grid settings
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
-GRID_SIZE = 10
+GRID_SIZE = 30
 FPS = 60
 
 # Colors
@@ -295,31 +295,66 @@ def visualize_performance():
     """Visualizes the logged performance data."""
     try:
         global log_data
+
+        # Player's performance graph
+        plt.figure(figsize=(10, 6))
+        plt.plot(log_data['Player_Mousetraps'], log_data['Player_Kills'], label='Player Kills', color='blue')
+        plt.xlabel('Number of Mousetraps Placed')
+        plt.ylabel('Player Kills')
+        plt.title('Player Performance')
+        plt.grid()
+        plt.legend()
+        plt.show()
+
+        # AI's performance graph
         plt.figure(figsize=(10, 6))
         plt.plot(log_data['Generation'], log_data['AI_Kills'], label='AI Kills', color='red')
-        plt.plot(log_data['Generation'], log_data['Player_Kills'], label='Player Kills', color='blue')
-        plt.plot(log_data['Generation'], log_data['Average_AI_Health'], label='Avg AI Health', color='green')
+        plt.plot(log_data['Generation'], log_data['Average_AI_Health'], label='Average AI Health', color='green')
         plt.xlabel('Generation')
-        plt.ylabel('Metrics')
-        plt.title('AI Performance Metrics')
-        plt.legend()
+        plt.ylabel('AI Metrics')
+        plt.title('AI Performance')
         plt.grid()
+        plt.legend()
         plt.show()
+
+        # Comparative graph of Player's and AI's kills
+        plt.figure(figsize=(10, 6))
+        plt.plot(log_data['Player_Mousetraps'], log_data['Player_Kills'], label='Player Kills', color='blue')
+        plt.plot(log_data['Generation'], log_data['AI_Kills'], label='AI Kills', color='red')
+        plt.xlabel('Number of Mousetraps Placed (Player) / Generation (AI)')
+        plt.ylabel('Number of Kills')
+        plt.title('Player vs AI Kills Comparison')
+        plt.grid()
+        plt.legend()
+        plt.show()
+
     except Exception as e:
         print(f"Error visualizing performance data: {e}")
 
-# Main function and menu remain unchanged
+
+# Main function and menu
 
 def main_menu():
+    try:
+        # Load background image
+        background_image = pygame.image.load("images/background_image.png")
+        background_image = pygame.transform.scale(background_image, (300, 300))
+        background_image_position = (150,200)
+        
+    except pygame.error as e:
+        print(f"Error loading background image: {e}")
+        sys.exit()
+
     while True:
         screen.fill(BLACK)
+        screen.blit(background_image, background_image_position)  # Blit the background image
         title_text = font.render("Cat And Mouse Game", True, WHITE)
         play_text = xsmall_font.render("Press ENTER to Play", True, WHITE)
         quit_text = xsmall_font.render("Press ESC to Quit", True, WHITE)
 
-        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 4))
-        screen.blit(play_text, (SCREEN_WIDTH // 2 - play_text.get_width() // 2, SCREEN_HEIGHT // 2))
-        screen.blit(quit_text, (SCREEN_WIDTH // 2 - quit_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
+        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 4 - 30))
+        screen.blit(play_text, (SCREEN_WIDTH // 2 - play_text.get_width() // 2, SCREEN_HEIGHT // 2 - 10))
+        screen.blit(quit_text, (SCREEN_WIDTH // 2 - quit_text.get_width() // 2, SCREEN_HEIGHT // 2 + 30))
 
         pygame.display.flip()
 
@@ -342,7 +377,8 @@ def main():
     pygame.mixer.music.play(-1)
     
     mousetraps_player = []
-    n = 15
+    player_mousetraps_count = 0
+    n = 15  # number of mouse in the grid
     mice = [Mouse(use_image=True) for _ in range(n)]  # Player's mice
     mice_ai = [Mouse(offset=SCREEN_WIDTH // 2, use_image=True) for _ in range(n)]  # AI's mice
 
@@ -356,7 +392,8 @@ def main():
     log_data = pd.DataFrame(columns=['Generation', 'AI_Kills', 'Player_Kills', 'Average_AI_Health'])
 
     generation = 0
-    f=5 #frequency of generating a new generation
+    display_generation = 0  # Track the displayed generation
+    f = 5  # Frequency of generating a new generation (if f is big, then generations are less)
 
     while True:
         for event in pygame.event.get():
@@ -369,6 +406,7 @@ def main():
                     grid_x = (mouse_x // GRID_SIZE) * GRID_SIZE + GRID_SIZE // 2
                     grid_y = (mouse_y // GRID_SIZE) * GRID_SIZE + GRID_SIZE // 2
                     mousetraps_player.append(Mousetrap(grid_x, grid_y))
+                    player_mousetraps_count += 1
 
         for mouse in mice[:]:
             mouse.move()
@@ -385,20 +423,23 @@ def main():
                 ai_kills += 1
                 if ai_kills == n:
                     win("AI", n)
-        
-        # Genetic Algorithm update. Create a new generation every n frames
-        
+
+        # Genetic Algorithm update. Create a new generation every f frames
         if generation % f == 0:
             ga.create_new_generation(mice_ai)
+            display_generation += 1  # Increment the displayed generation
 
         # UI update
         avg_health = sum(mouse.health for mouse in mice_ai) / len(mice_ai) if mice_ai else 0
-        log_data = append_log_data(log_data, {
-            'Generation': [generation],
-            'AI_Kills': [ai_kills],
-            'Player_Kills': [player_kills],
-            'Average_AI_Health': [avg_health]
-        })
+        if generation % f == 0:
+            log_data = append_log_data(log_data, {
+                'Generation': [display_generation],  # Log the displayed generation
+                'AI_Kills': [ai_kills],
+                'Player_Kills': [player_kills],
+                'Average_AI_Health': [avg_health],
+                'Player_Mousetraps': [player_mousetraps_count]  # Log mousetrap count
+            })
+
         generation += 1
 
         screen.fill(BLACK)
@@ -418,10 +459,18 @@ def main():
         for enemy in mice_ai:
             enemy.draw()
 
+        # Display Player and AI scores
         player_score_text = xsmall_font.render(f"Player's Score: {player_kills}", True, WHITE)
         ai_score_text = xsmall_font.render(f"AI's Score: {ai_kills}", True, WHITE)
         screen.blit(player_score_text, (10, 10))
         screen.blit(ai_score_text, (SCREEN_WIDTH // 2 + 10, 10))
+
+        # Display mousetrap count and generation
+        player_trap_text = xsmall_font.render(f"Player Mousetraps: {player_mousetraps_count}", True, WHITE)
+        generation_text = xsmall_font.render(f"No. of Generations: {display_generation}", True, WHITE)
+
+        screen.blit(player_trap_text, (10, 40))
+        screen.blit(generation_text, (SCREEN_WIDTH // 2 + 10, 40))
 
         pygame.display.flip()
         clock.tick(FPS)
